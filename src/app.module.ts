@@ -3,31 +3,18 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { validate } from './config/env.validation';
+import { AppConfigModule } from './config/config.module';
+import { EnvironmentVariables } from './config/env.variables';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      cache: true,
-      isGlobal: true,
-      load: [validate],
-    }),
+    AppConfigModule,
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'mariadb',
-        host: configService.get<string>('db.host'),
-        port: configService.get<number>('db.port'),
-        username: configService.get<string>('db.username'),
-        password: configService.get<string>('db.password'),
-        database: configService.get<string>('db.database'),
-        synchronize: configService.get<boolean>('db.synchronize'),
-        logging: configService.get<boolean>('db.logging'),
-        entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-      }),
-      inject: [ConfigService],
+      imports: [AppConfigModule],
+      inject: [EnvironmentVariables],
+      useFactory: (envVariables: EnvironmentVariables) =>
+        envVariables.getTypeOrmConfig,
     }),
     WinstonModule.forRoot({
       level: 'debug',
