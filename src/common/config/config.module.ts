@@ -1,17 +1,17 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { EnvironmentVariables, validate } from './env.variables';
+import authConfig from './auth.config';
+import { validationSchema } from './validation.schema';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      validate,
       isGlobal: true,
       cache: true,
       envFilePath: [`.env.${process.env.NODE_ENV}`, '.env'],
+      load: [authConfig],
+      validationSchema,
     }),
   ],
-  providers: [EnvironmentVariables],
-  exports: [EnvironmentVariables],
 })
 export class AppConfigModule {}
