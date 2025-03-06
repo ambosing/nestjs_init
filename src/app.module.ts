@@ -6,6 +6,7 @@ import * as winston from 'winston';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppConfigModule } from './config/config.module';
 import { EnvironmentVariables } from './config/env.variables';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -15,6 +16,15 @@ import { EnvironmentVariables } from './config/env.variables';
       inject: [EnvironmentVariables],
       useFactory: (envVariables: EnvironmentVariables) =>
         envVariables.getTypeOrmConfig,
+    }),
+    // API 요청 빈도 제한 필요 시
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: 60000,
+          limit: 10,
+        },
+      ],
     }),
     WinstonModule.forRoot({
       level: 'debug',
