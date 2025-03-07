@@ -7,6 +7,7 @@ import {
 import { TimeUtils } from '../utils/time.utils';
 import { Request, Response } from 'express';
 import * as requestIp from 'request-ip';
+import * as Sentry from '@sentry/nestjs';
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -15,6 +16,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
     const status = exception.getStatus();
+
+    Sentry.captureException(exception);
 
     response.status(status).json({
       success: false,

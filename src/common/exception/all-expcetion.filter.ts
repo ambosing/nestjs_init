@@ -3,6 +3,7 @@ import { TimeUtils } from '../utils/time.utils';
 import { Request, Response } from 'express';
 import * as requestIp from 'request-ip';
 import { BaseExceptionFilter } from '@nestjs/core';
+import * as Sentry from '@sentry/nestjs';
 
 @Catch()
 export class AllExceptionsFilter extends BaseExceptionFilter {
@@ -13,6 +14,8 @@ export class AllExceptionsFilter extends BaseExceptionFilter {
       const ctx = host.switchToHttp();
       const response = ctx.getResponse<Response>();
       const request = ctx.getRequest<Request>();
+
+      Sentry.captureException(exception);
 
       response.status(500).json({
         success: false,

@@ -6,9 +6,21 @@ import helmet from 'helmet';
 import { HttpExceptionFilter } from './common/exception/http-expcetion.filter';
 import { AllExceptionsFilter } from './common/exception/all-expcetion.filter';
 
+import * as Sentry from '@sentry/node';
+import { nodeProfilingIntegration } from '@sentry/profiling-node';
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
+  });
+
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    integrations: [nodeProfilingIntegration()],
+
+    tracesSampleRate: 1.0,
+
+    profilesSampleRate: 1.0,
   });
 
   const documentOptions = new DocumentBuilder()
